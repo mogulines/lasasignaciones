@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Asignaciones BK</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>Asignaciones BK</h1>
+
+  <select id="modo">
+    <option value="mias">Ver mis horarios</option>
+    <option value="todos">Ver horarios de todos</option>
+  </select>
+
+  <div id="form-legajo">
+    <input type="text" id="legajo" placeholder="Ingresá tu legajo" />
+    <button id="btn-ver-mis-horarios" type="button">Ver mis horarios</button>
+  </div>
+
+  <div id="tabla-asignaciones" class="tabla" style="display:none;"></div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
