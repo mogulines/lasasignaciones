@@ -37,7 +37,7 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   margin-top: 2rem;
   width: 90%;
-  max-width: 1200px; /* más ancho para modo "todos" */
+  max-width: 600px;
   padding: 1rem;
   opacity: 0;
   transform: scale(0.9);
@@ -59,9 +59,9 @@ button:hover {
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   padding: 1rem;
-  flex: 1 1 400px; /* más ancho */
-  min-width: 350px;
-  max-width: 500px;
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 350px;
   text-align: left;
 }
 
