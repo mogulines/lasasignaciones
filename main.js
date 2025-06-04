@@ -34,7 +34,6 @@ async function buscarAsignaciones() {
     const data = await res.json();
     if (!data.asignaciones) throw new Error("No hay asignaciones");
 
-    // Agregar nombre a cada asignacion para mostrar
     data.asignaciones.forEach(a => a.nombre = nombrePorLegajo(legajo));
 
     mostrarTabla(data.asignaciones, `Horarios para ${legajo} (${nombrePorLegajo(legajo)})`, true);
@@ -69,12 +68,17 @@ async function mostrarTodos() {
     }
   }
 
-  // Ordenar por fecha y horaEntrada con formato DD/MM
+  // Ordenar por fecha y horaEntrada con fecha en formato DD/MM
   todas.sort((a, b) => {
     const [dA, mA] = a.fecha.split("/").map(Number);
     const [dB, mB] = b.fecha.split("/").map(Number);
-    if (mA === mB) return dA - dB;
-    return mA - mB;
+
+    const dateA = new Date(2000, mA - 1, dA);
+    const dateB = new Date(2000, mB - 1, dB);
+
+    if (dateA - dateB !== 0) return dateA - dateB;
+
+    return a.horaEntrada.localeCompare(b.horaEntrada);
   });
 
   mostrarTablaPorDias(todas);
@@ -90,20 +94,21 @@ function mostrarTablaPorDias(asignaciones) {
     return acc;
   }, {});
 
-  // Construir html con cuadros por día
-  let html = `<h2>Horarios de todos</h2><div class="contenedor-dias">`;
-
-  for (const fecha of Object.keys(agrupadoPorFecha).sort((a,b) => {
+  // Ordenar fechas correctamente (DD/MM)
+  const fechasOrdenadas = Object.keys(agrupadoPorFecha).sort((a, b) => {
     const [dA, mA] = a.split("/").map(Number);
     const [dB, mB] = b.split("/").map(Number);
-    if(mA === mB) return dA - dB;
-    return mA - mB;
-  })) {
-    const asigns = agrupadoPorFecha[fecha];
 
-    // No mostrar contador totalHorasDia cuando vemos todos
-    // Pero si querés calcular horas, aquí podés quitarlo
-    // (Para que no tire números negativos o raros)
+    const dateA = new Date(2000, mA - 1, dA);
+    const dateB = new Date(2000, mB - 1, dB);
+
+    return dateA - dateB;
+  });
+
+  let html = `<h2>Horarios de todos</h2><div class="contenedor-dias">`;
+
+  for (const fecha of fechasOrdenadas) {
+    const asigns = agrupadoPorFecha[fecha];
 
     html += `<div class="dia-cuadro">`;
     html += `<h3>${fecha}</h3>`;
