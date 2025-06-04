@@ -21,12 +21,6 @@ function nombrePorLegajo(legajo) {
   return encontrado ? encontrado.nombre : "Sin nombre";
 }
 
-function fechaToComparable(fechaStr) {
-  // fechaStr en formato DD/MM
-  const [dd, mm] = fechaStr.split("/").map(n => n.padStart(2, "0"));
-  return `${mm}-${dd}`; // mes-día para ordenar cronológicamente
-}
-
 async function buscarAsignaciones() {
   const legajo = document.getElementById("legajo").value.trim();
   if (!legajo) {
@@ -40,6 +34,7 @@ async function buscarAsignaciones() {
     const data = await res.json();
     if (!data.asignaciones) throw new Error("No hay asignaciones");
 
+    // Agregar nombre a cada asignacion para mostrar
     data.asignaciones.forEach(a => a.nombre = nombrePorLegajo(legajo));
 
     mostrarTabla(data.asignaciones, `Horarios para ${legajo} (${nombrePorLegajo(legajo)})`, true);
@@ -74,11 +69,12 @@ async function mostrarTodos() {
     }
   }
 
+  // Ordenar por fecha y horaEntrada con formato DD/MM
   todas.sort((a, b) => {
-    if (a.fecha === b.fecha) {
-      return a.horaEntrada.localeCompare(b.horaEntrada);
-    }
-    return fechaToComparable(a.fecha).localeCompare(fechaToComparable(b.fecha));
+    const [dA, mA] = a.fecha.split("/").map(Number);
+    const [dB, mB] = b.fecha.split("/").map(Number);
+    if (mA === mB) return dA - dB;
+    return mA - mB;
   });
 
   mostrarTablaPorDias(todas);
@@ -87,23 +83,27 @@ async function mostrarTodos() {
 function mostrarTablaPorDias(asignaciones) {
   const contenedor = document.getElementById("tabla-asignaciones");
 
+  // Agrupar asignaciones por fecha
   const agrupadoPorFecha = asignaciones.reduce((acc, a) => {
     if (!acc[a.fecha]) acc[a.fecha] = [];
     acc[a.fecha].push(a);
     return acc;
   }, {});
 
+  // Construir html con cuadros por día
   let html = `<h2>Horarios de todos</h2><div class="contenedor-dias">`;
 
-  for (const fecha of Object.keys(agrupadoPorFecha).sort((a,b) => fechaToComparable(a).localeCompare(fechaToComparable(b)))) {
+  for (const fecha of Object.keys(agrupadoPorFecha).sort((a,b) => {
+    const [dA, mA] = a.split("/").map(Number);
+    const [dB, mB] = b.split("/").map(Number);
+    if(mA === mB) return dA - dB;
+    return mA - mB;
+  })) {
     const asigns = agrupadoPorFecha[fecha];
 
-    let totalHorasDia = 0;
-    asigns.forEach(a => {
-      const [h1, m1] = a.horaEntrada.split(":").map(Number);
-      const [h2, m2] = a.horaSalida.split(":").map(Number);
-      totalHorasDia += (h2 + m2/60) - (h1 + m1/60);
-    });
+    // No mostrar contador totalHorasDia cuando vemos todos
+    // Pero si querés calcular horas, aquí podés quitarlo
+    // (Para que no tire números negativos o raros)
 
     html += `<div class="dia-cuadro">`;
     html += `<h3>${fecha}</h3>`;
@@ -114,7 +114,6 @@ function mostrarTablaPorDias(asignaciones) {
     });
 
     html += `</tbody></table>`;
-    html += `<div class="contador">Total horas día: ${totalHorasDia.toFixed(1)} hs</div>`;
     html += `</div>`;
   }
 
